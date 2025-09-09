@@ -1,11 +1,9 @@
 __credits__ = ["Intelligent Unmanned Systems Laboratory at Westlake University."]
-
-import sys    
-sys.path.append("..")         
+  
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches          
-from examples.arguments import args           
+from .arguments import args       
 
 class GridWorld():
 

@@ -2,7 +2,6 @@ __credits__ = ["Intelligent Unmanned Systems Laboratory at Westlake University."
 '''
 Specify parameters of the env
 '''
-from typing import Union
 import numpy as np
 import argparse
 

@@ -1,10 +1,9 @@
-import sys
-from src.grid_world import GridWorld
+import grid_world as gw
 import random
 import numpy as np
 
 def main():
-    env = GridWorld()
+    env = gw.GridWorld()
     state = env.reset()               
     for t in range(1000):
         env.render()
