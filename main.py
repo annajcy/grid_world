@@ -1,3 +1,4 @@
+import sys
 import grid_world as gw
 import random
 import numpy as np
@@ -16,13 +17,30 @@ def main():
                                  gw.GridWorldState(2, 1)
                              ])
     print("Initial State:", gw_mdp.current_state.to_list())
-    action = gw_mdp.decide(gw_mdp.current_state)
-    print("Action:", action.to_list())
-    (next_state, reward, done, info) = gw_mdp.step(action)
-    print("Next State:", next_state.to_list())
-    print("Reward:", reward)
-    print("Done:", done)
-    print("Info:", info)
+    print("State Space:", gw_state_space.to_list())
+    print("Action Space:", gw_action_space.to_list())
+    gw_renderer = gw.grid_world_renderer.GridWorldRenderer(gw_mdp)
+
+    while gw_renderer.running:
+        gw_renderer.handle_events()
+        gw_renderer.render()
+        
+        action = gw_mdp.decide(gw_mdp.current_state)
+        print("Current State:", gw_mdp.current_state.to_list())
+        print("Action:", action.to_list())
+        
+        (next_state, reward, done, info) = gw_mdp.step(action)
+        print("Next State:", next_state.to_list())
+        print("Reward:", reward)
+        print("Done:", done)
+        print("Info:", info)
+        print("-----")
+        
+        if done:
+            print("Reached the goal!")
+            break
+
+    gw_renderer.close()
 
 if __name__ == "__main__":
     main()

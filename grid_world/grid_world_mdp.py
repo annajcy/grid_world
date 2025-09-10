@@ -1,6 +1,6 @@
 from typing import List, Tuple, Dict, Any
 from dataclasses import dataclass
-from .mdp import MDP, Action, ActionSpace, State, StateSpace
+from rl.mdp import MDP, Action, ActionSpace, State, StateSpace
 import random
 
 @dataclass(frozen=True, slots=True)
@@ -130,6 +130,7 @@ class GridWorldMDP(MDP[GridWorldState, GridWorldAction]):
             self.current_state = new_state
             return (self.current_state, 1.0, True, {})
         
+        self.current_state = new_state
         return (new_state, 0.0, False, {})
 
     def decide(self, state: GridWorldState) -> GridWorldAction:
