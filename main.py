@@ -7,7 +7,7 @@ def main():
     gw_state_space = gw.GridWorldStateSpace(width=5, height=5)
     gw_action_space = gw.GridWorldActionSpace()
 
-    gw_mdp = gw.GridWorldMDP(state_space=gw_state_space, 
+    gw_mdp = gw.TabularGridWorldMDP(state_space=gw_state_space, 
                              action_space=gw_action_space, 
                              start_state=gw.GridWorldState(0, 0), 
                              goal_state=gw.GridWorldState(4, 4), 
@@ -19,6 +19,10 @@ def main():
     print("Initial State:", gw_mdp.current_state.to_list())
     print("State Space:", gw_state_space.to_list())
     print("Action Space:", gw_action_space.to_list())
+    print("Goal State:", gw_mdp.goal_state.to_list())
+    print("Forbiddens:", [s.to_list() for s in gw_mdp.forbiddens])
+    print("Initial Transition Probabilities:", gw_mdp.policy)
+    
     gw_renderer = gw.grid_world_renderer.GridWorldRenderer(gw_mdp)
 
     while gw_renderer.running:

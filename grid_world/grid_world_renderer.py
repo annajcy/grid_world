@@ -28,6 +28,15 @@ class GridWorldRenderer(Renderer[GridWorldMDP]):
                     self.cell_height)
                 pygame.draw.rect(self.screen, (200, 200, 200), rect, 1)  # Light gray grid lines
                 
+    def draw_goal(self) -> None:
+        goal = self.mdp.goal_state
+        rect = pygame.Rect(
+            self.screen_width_margin + goal.x * self.cell_width, 
+            self.screen_height_margin + goal.y * self.cell_height, 
+            self.cell_width, 
+            self.cell_height)
+        pygame.draw.rect(self.screen, (0, 255, 0), rect)  # Green goal cell
+                
     def draw_forbiddens(self) -> None:
         for forbidden in self.mdp.forbiddens:
             rect = pygame.Rect(
@@ -51,6 +60,7 @@ class GridWorldRenderer(Renderer[GridWorldMDP]):
 
         self.draw_grid()
         self.draw_forbiddens()
+        self.draw_goal()
         self.draw_agent()
 
         pygame.display.flip()

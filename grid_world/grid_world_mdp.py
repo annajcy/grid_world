@@ -135,3 +135,34 @@ class GridWorldMDP(MDP[GridWorldState, GridWorldAction]):
 
     def decide(self, state: GridWorldState) -> GridWorldAction:
         return self.action_space.sample()
+    
+class TabularGridWorldMDP(GridWorldMDP):
+    def __init__(self, 
+                 state_space: GridWorldStateSpace, 
+                 action_space: GridWorldActionSpace, 
+                 start_state: GridWorldState, 
+                 goal_state: GridWorldState, 
+                 forbiddens: List[GridWorldState]) -> None:
+        super().__init__(state_space, action_space, start_state, goal_state, forbiddens)
+        self.policy: Dict[Tuple[GridWorldState, GridWorldAction], float] = {}
+        self.value_function: Dict[GridWorldState, float] = {}
+        
+        for x in range(state_space.width):
+            for y in range(state_space.height):
+                state = GridWorldState(x, y)
+                for action in action_space.actions:
+                    self.policy[(state, action)] = 1.0 / len(action_space.actions)
+                    
+        def decide(self, state:GridWorldState) -> GridWorldAction:
+            actions = self.action_space.actions
+            probabilities = [self.policy[(state, action)] for action in actions]
+            
+            rng = random.uniform(0.0, 1.0)
+            cumulative_prob = 0.0
+            
+            for i, prob in enumerate(probabilities):
+                cumulative_prob += prob
+                if rng <= cumulative_prob:
+                    return actions[i]
+    
+            return actions[-1]
