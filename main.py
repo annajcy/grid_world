@@ -12,8 +12,8 @@ def main():
                              start_state=gw.GridWorldState(0, 0), 
                              goal_state=gw.GridWorldState(4, 4), 
                              forbiddens=[
-                                 gw.GridWorldState(1, 1), 
-                                 gw.GridWorldState(1, 2), 
+                                 gw.GridWorldState(1, 3), 
+                                 gw.GridWorldState(3, 4), 
                                  gw.GridWorldState(2, 1)
                              ])
     print("Initial State:", gw_mdp.current_state.to_list())
@@ -38,7 +38,7 @@ def main():
         
         if done:
             print("Reached the goal!")
-            break
+            # break
 
     gw_renderer.close()
 

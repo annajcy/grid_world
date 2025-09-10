@@ -46,14 +46,12 @@ class GridWorldRenderer(Renderer[GridWorldMDP]):
             self.cell_height)
         pygame.draw.rect(self.screen, (0, 0, 255), agent_rect)
 
-    def render(self, fps: int = 1) -> None:
+    def render(self, fps: int = 30) -> None:
         self.screen.fill((255, 255, 255))  # White background
 
         self.draw_grid()
         self.draw_forbiddens()
         self.draw_agent()
 
-        pygame.display.flip()
-        
         pygame.display.flip()
         self.clock.tick(fps)
