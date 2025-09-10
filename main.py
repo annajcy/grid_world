@@ -3,28 +3,26 @@ import random
 import numpy as np
 
 def main():
-    env = gw.GridWorld()
-    state = env.reset()               
-    for t in range(1000):
-        env.render()
-        action = random.choice(env.action_space)
-        next_state, reward, done, info = env.step(action)
-        print(f"Step: {t}, Action: {action}, State: {next_state+(np.array([1,1]))}, Reward: {reward}, Done: {done}")
-        # if done:
-        #     break
-    
-    # Add policy
-    policy_matrix=np.random.rand(env.num_states,len(env.action_space))                                            
-    policy_matrix /= policy_matrix.sum(axis=1)[:, np.newaxis]  # make the sum of elements in each row to be 1
+    gw_state_space = gw.GridWorldStateSpace(width=5, height=5)
+    gw_action_space = gw.GridWorldActionSpace()
 
-    env.add_policy(policy_matrix)
-    
-    # Add state values
-    values = np.random.uniform(0,10,(env.num_states,))
-    env.add_state_values(values)
-
-    # Render the environment
-    env.render(animation_interval=2)
+    gw_mdp = gw.GridWorldMDP(state_space=gw_state_space, 
+                             action_space=gw_action_space, 
+                             start_state=gw.GridWorldState(0, 0), 
+                             goal_state=gw.GridWorldState(4, 4), 
+                             forbiddens=[
+                                 gw.GridWorldState(1, 1), 
+                                 gw.GridWorldState(1, 2), 
+                                 gw.GridWorldState(2, 1)
+                             ])
+    print("Initial State:", gw_mdp.current_state.to_list())
+    action = gw_mdp.decide(gw_mdp.current_state)
+    print("Action:", action.to_list())
+    (next_state, reward, done, info) = gw_mdp.step(action)
+    print("Next State:", next_state.to_list())
+    print("Reward:", reward)
+    print("Done:", done)
+    print("Info:", info)
 
 if __name__ == "__main__":
     main()

@@ -1,1 +1,1 @@
-from .world import GridWorld
+from .mdp.grid_world_mdp import GridWorldMDP, GridWorldState, GridWorldAction, GridWorldStateSpace, GridWorldActionSpace
