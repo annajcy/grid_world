@@ -41,7 +41,7 @@ class GridWorldAction(Action):
     def to_list(self) -> List[int]:
         return [self.dx, self.dy]
     
-    def __iter__(self):
+    def __iter__(self) :
         return iter((self.dx, self.dy))
     
     @classmethod
@@ -153,16 +153,16 @@ class TabularGridWorldMDP(GridWorldMDP):
                 for action in action_space.actions:
                     self.policy[(state, action)] = 1.0 / len(action_space.actions)
                     
-        def decide(self, state:GridWorldState) -> GridWorldAction:
-            actions = self.action_space.actions
-            probabilities = [self.policy[(state, action)] for action in actions]
-            
-            rng = random.uniform(0.0, 1.0)
-            cumulative_prob = 0.0
-            
-            for i, prob in enumerate(probabilities):
-                cumulative_prob += prob
-                if rng <= cumulative_prob:
-                    return actions[i]
-    
-            return actions[-1]
+    def decide(self, state:GridWorldState) -> GridWorldAction:
+        actions = self.action_space.actions
+        probabilities = [self.policy[(state, action)] for action in actions]
+        
+        rng = random.uniform(0.0, 1.0)
+        cumulative_prob = 0.0
+        
+        for i, prob in enumerate(probabilities):
+            cumulative_prob += prob
+            if rng <= cumulative_prob:
+                return actions[i]
+
+        return actions[-1]

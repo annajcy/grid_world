@@ -1,6 +1,5 @@
 from rl.renderer import Renderer
-from rl.mdp import MDP
-from .grid_world_mdp import GridWorldState, GridWorldAction, GridWorldStateSpace, GridWorldActionSpace, GridWorldMDP
+from .grid_world_mdp import GridWorldMDP
 import pygame
 
 class GridWorldRenderer(Renderer[GridWorldMDP]):

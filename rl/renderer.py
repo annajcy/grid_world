@@ -1,7 +1,7 @@
 import pygame
-from typing import Tuple, List, Optional, Dict, Any, Generic, TypeVar, Callable
+from typing import Generic, TypeVar
 from abc import ABC, abstractmethod
-from rl.mdp import State, Action, MDP
+from rl.mdp import MDP
 
 MDPType = TypeVar('MDPType', bound=MDP)
 

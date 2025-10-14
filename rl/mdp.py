@@ -1,4 +1,4 @@
-from typing import Any, Tuple, List, Union, TypeVar, Generic, Dict
+from typing import Any, Tuple, List, TypeVar, Generic, Dict
 from abc import ABC, abstractmethod
 
 T_State = TypeVar('T_State', bound='State')
