@@ -11,16 +11,18 @@ def main():
     width, height = 5, 4
     initial_state = GridWorldState(0, 0)
     goal_state = GridWorldState(4, 3)
+    discount_factor = 0.9
+    bellman_solve_steps = 100
     
     mdp = TabularGridWorldMDP(
         width=width,
         height=height,
         initial_state=initial_state,
         goal_state=goal_state,
-        discount_factor=0.9
+        discount_factor=discount_factor
     )
     
-    state_values = mdp.solve_state_value(steps=1000)
+    state_values = mdp.solve_state_value(steps=bellman_solve_steps)
     renderer = TabularGridWorldRenderer(
         tabular_gw_mdp=mdp,
         caption='Tabular Grid World - Original',
@@ -34,8 +36,8 @@ def main():
     renderer.close()
     
     mdp.initialize()
-    mdp.policy_iteration(threshold=1e-4, solve_state_value_steps=100)
-    state_values = mdp.solve_state_value(steps=1000)
+    mdp.policy_iteration(threshold=1e-4, solve_state_value_steps=bellman_solve_steps)
+    state_values = mdp.solve_state_value(steps=bellman_solve_steps)
     renderer = TabularGridWorldRenderer(
         tabular_gw_mdp=mdp,
         caption='Tabular Grid World - Policy iteration',
@@ -50,7 +52,7 @@ def main():
     
     mdp.initialize()
     mdp.value_iteration(threshold=1e-4)
-    state_values = mdp.solve_state_value(steps=1000)
+    state_values = mdp.solve_state_value(steps=bellman_solve_steps)
     renderer = TabularGridWorldRenderer(
         tabular_gw_mdp=mdp,
         caption='Tabular Grid World - Value iteration',

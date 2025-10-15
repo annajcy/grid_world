@@ -1,4 +1,4 @@
-from typing import Tuple, Dict
+from typing import Tuple, Dict, List
 import numpy as np
 
 from .grid_world_mdp import GridWorldMDP, GridWorldState, GridWorldAction
@@ -74,26 +74,8 @@ class TabularGridWorldMDP(GridWorldMDP):
             if rand_val < cumulative:
                 return action
         return self.action_space.sample()  # Fallback, should not reach here if probs sum to 1
-
-    # policy iteration (truncated version)
-    def policy_iteration(self, threshold: float=1e-4, solve_state_value_steps: int=1000) -> None:
-        while True:
-            # value evaluation
-            state_values = self.solve_state_value(solve_state_value_steps) 
             
-            #policy improvment
-            new_policy = self.policy.copy()
-            for state in self.state_space.to_list():
-                optimal_action = self.get_optimal_action(state, state_values)
-                for action in self.action_space.to_list():
-                    new_policy[(state, action)] = 0.0 if action != optimal_action else 1.0
-                    
-            # check convergence
-            max_change = max(abs(new_policy[key] - self.policy[key]) for key in self.policy.keys())
-            self.policy = new_policy
-            if max_change < threshold:
-                break
-            
+    # value iteration 
     def value_iteration(self, threshold: float=1e-4) -> None:
         state_values = { state: 0.0 for state in self.state_space.to_list() }
         while True:
@@ -117,8 +99,91 @@ class TabularGridWorldMDP(GridWorldMDP):
               
             # check convergence
             max_change = max(abs(state_values[s] - new_state_values[s]) for s in self.state_space.to_list())
-            
             if max_change < threshold:
                 break
             
             state_values = new_state_values
+            
+    # policy iteration (truncated version)
+    def policy_iteration(self, threshold: float=1e-4, solve_state_value_steps: int=1000) -> None:
+        while True:
+            # value evaluation
+            state_values = self.solve_state_value(solve_state_value_steps) 
+            
+            #policy improvment
+            new_policy = self.policy.copy()
+            for state in self.state_space.to_list():
+                optimal_action = self.get_optimal_action(state, state_values)
+                for action in self.action_space.to_list():
+                    new_policy[(state, action)] = 0.0 if action != optimal_action else 1.0
+                    
+            # check convergence
+            max_change = max(abs(new_policy[key] - self.policy[key]) for key in self.policy.keys())
+            self.policy = new_policy
+            if max_change < threshold:
+                break
+            
+class MCTabularGridWorldMDP(TabularGridWorldMDP):
+    def __init__(self, 
+                 width: int, 
+                 height: int, 
+                 initial_state: GridWorldState, 
+                 goal_state: GridWorldState, 
+                 discount_factor: float=0.9,
+                 rng: np.random.Generator=np.random.default_rng(42)) -> None:
+        super().__init__(width, height, initial_state, goal_state, discount_factor, rng)
+        
+    def initialize(self) -> None:
+        super().initialize()
+    
+    def sample_episode_from_state_action(self, state: GridWorldState, action: GridWorldAction, episode_length: int=100) -> List[Tuple[GridWorldState, GridWorldAction, float]]:
+        episode = []
+        next_state, reward = self.transition(state, action)
+        episode.append((state, action, reward))
+        state = next_state
+        for _ in range(episode_length - 1):
+            action = self.decide(state)
+            next_state, reward = self.transition(state, action)
+            episode.append((state, action, reward))
+            state = next_state
+        return episode
+    
+    def get_q_table(self, episode: List[Tuple[GridWorldState, GridWorldAction, float]]) -> Tuple[Tuple[GridWorldState, GridWorldAction], float]:
+        G = 0.0
+        for i in range(len(episode)):
+            G = episode[len(episode) - 1 - i][2] + self.discount_factor * G  # G_t = R_{t+1} + γ * G_{t+1}
+        return (episode[0][0], episode[0][1]), G
+    
+    # Monte Carlo basic
+    def monte_carlo_basic(self, iterations = 100, episode_count: int=10, episode_length: int=20) -> None:
+        for _ in range(iterations):
+            
+            Q : Dict[Tuple[GridWorldState, GridWorldAction], float] = {
+                (state, action): 0.0
+                for state in self.state_space.to_list() 
+                for action in self.action_space.actions
+            }
+            
+            for state in self.state_space.to_list():
+                # sample episodes to update Q
+                for action in self.action_space.actions:
+                    G_total = 0.0
+                    for _ in range(episode_count):
+                        episode = self.sample_episode_from_state_action(state, action, episode_length)
+                        (s, a), G = self.get_q_table(episode)
+                        G_total += G
+                    G_avg = G_total / episode_count if episode_count > 0 else 0.0
+                    
+                    Q[(state, action)] = G_avg
+                    
+                # policy update
+                action_values = [Q[(state, action)] for action in self.action_space.actions]
+                optimal_action = None
+                max_action_value = max(action_values)
+                for action, value in zip(self.action_space.actions, action_values):
+                    if value == max_action_value:
+                        optimal_action = action
+                        break
+                
+                for action in self.action_space.actions:
+                    self.policy[(state, action)] = 1.0 if action == optimal_action else 0.0

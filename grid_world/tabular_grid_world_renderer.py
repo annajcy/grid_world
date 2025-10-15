@@ -4,7 +4,7 @@ import pygame
 from .tabular_grid_world_mdp import TabularGridWorldMDP
 from .grid_world_renderer import GridWorldRenderer
 
-class TabularGridWorldRenderer(GridWorldRenderer[TabularGridWorldMDP]):
+class TabularGridWorldRenderer(GridWorldRenderer):
     def __init__(self, 
                  tabular_gw_mdp: TabularGridWorldMDP, 
                  caption: str = 'Tabular Grid World Renderer',

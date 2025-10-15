@@ -1,13 +1,10 @@
+from typing import Any
 import pygame
-from typing import Generic, TypeVar
 from abc import ABC, abstractmethod
-from rl.mdp import MDP
 
-MDPType = TypeVar('MDPType', bound=MDP)
-
-class Renderer(ABC, Generic[MDPType]):
+class Renderer(ABC):
     def __init__(self, 
-                 mdp: MDPType, 
+                 mdp: Any, 
                  caption: str = 'RL Renderer',
                  screen_width: int = 800,
                  screen_height: int = 800) -> None:

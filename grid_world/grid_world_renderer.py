@@ -1,16 +1,13 @@
-from typing import Generic, TypeVar
 import pygame
 import math
 
 from rl.renderer import Renderer
 from .grid_world_mdp import GridWorldMDP
 
-GridWorldMDPType = TypeVar('GridWorldMDPType', bound=GridWorldMDP)
-
-class GridWorldRenderer(Renderer[GridWorldMDPType], Generic[GridWorldMDPType]):
+class GridWorldRenderer(Renderer):
 
     def __init__(self, 
-                 gw_mdp: GridWorldMDPType, 
+                 gw_mdp: GridWorldMDP, 
                  caption: str = 'Grid World Renderer',
                  screen_width: int = 800, 
                  screen_height: int = 800, 
