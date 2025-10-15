@@ -82,26 +82,30 @@ class TabularGridWorldRenderer(Renderer[TabularGridWorldMDP]):
         if not self.show_policy:
             return
             
-        arrow_length = min(self.cell_width, self.cell_height) // 3
+        max_arrow_length = min(self.cell_width, self.cell_height) // 3
+        min_arrow_length = max_arrow_length // 4  # Minimum arrow length for visibility
         
         for state in self.mdp.state_space.to_list():
             state_policy = self.mdp.get_state_policy(state)
             
-            # Find the action with highest probability
-            best_action = max(state_policy.items(), key=lambda x: x[1])[0]
-            best_prob = state_policy[best_action]
+            center_x = self.screen_width_margin + state.x * self.cell_width + self.cell_width // 2
+            center_y = self.screen_height_margin + state.y * self.cell_height + self.cell_height // 2
             
-            # Only draw if there's a clear best action (probability > 0.5)
-            if best_prob > 0.5:
-                center_x = self.screen_width_margin + state.x * self.cell_width + self.cell_width // 2
-                center_y = self.screen_height_margin + state.y * self.cell_height + self.cell_height // 2
-                
-                # Calculate arrow end position
-                end_x = center_x + best_action.dx * arrow_length
-                end_y = center_y + best_action.dy * arrow_length
-                
-                # Draw arrow
-                self._draw_arrow(center_x, center_y, end_x, end_y, (255, 0, 0), 2)
+            # Draw arrows for all actions with non-zero probability
+            for action, prob in state_policy.items():
+                if prob > 0.01:  # Only draw if probability is significant
+                    # Arrow length proportional to probability
+                    arrow_length = min_arrow_length + (max_arrow_length - min_arrow_length) * prob
+                    
+                    # Calculate arrow end position
+                    end_x = int(center_x + action.dx * arrow_length)
+                    end_y = int(center_y + action.dy * arrow_length)
+                    
+                    # Arrow thickness also proportional to probability
+                    thickness = max(1, int(3 * prob))
+                    
+                    # Draw arrow
+                    self._draw_arrow(center_x, center_y, end_x, end_y, (255, 0, 0), thickness)
     
     def _draw_arrow(self, start_x: int, start_y: int, end_x: int, end_y: int, 
                     color: tuple, thickness: int) -> None:
@@ -168,7 +172,7 @@ class TabularGridWorldRenderer(Renderer[TabularGridWorldMDP]):
         self.draw_state_values()
         self.draw_policy_arrows()
         self.draw_agent()
-        self.draw_legend()
+        # self.draw_legend()
 
         pygame.display.flip()
         self.clock.tick(fps)
