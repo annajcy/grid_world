@@ -2,7 +2,7 @@ from typing import List, Tuple
 from dataclasses import dataclass
 
 from rl.mdp import MDP, Action, ActionSpace, State, StateSpace
-import random
+import numpy as np
 
 @dataclass(frozen=True, slots=True)
 class GridWorldState(State):
@@ -20,9 +20,9 @@ class GridWorldStateSpace(StateSpace[GridWorldState]):
         self.width = width
         self.height = height
 
-    def sample(self) -> GridWorldState:
-        x = random.randint(0, self.width - 1)
-        y = random.randint(0, self.height - 1)
+    def sample(self, rng: np.random.Generator=np.random.default_rng()) -> GridWorldState:
+        x = rng.choice(np.arange(self.width), 1)[0]
+        y = rng.choice(np.arange(self.height), 1)[0]
         return GridWorldState(x, y)
 
     def contains(self, state: GridWorldState) -> bool:
@@ -70,8 +70,9 @@ class GridWorldActionSpace(ActionSpace[GridWorldAction]):
             GridWorldAction.down()
         ]
 
-    def sample(self) -> GridWorldAction:
-        return random.choice(self.actions)
+    def sample(self, rng: np.random.Generator=np.random.default_rng()) -> GridWorldAction:
+        idx = rng.choice(np.arange(len(self.actions)), 1)[0]
+        return self.actions[idx]
 
     def contains(self, action: GridWorldAction) -> bool:
         if not isinstance(action, GridWorldAction):

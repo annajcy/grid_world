@@ -1,4 +1,5 @@
 from grid_world import TabularGridWorldMDP, GridWorldState, TabularGridWorldRenderer
+import numpy as np
 
 def show(renderer: TabularGridWorldRenderer, mdp: TabularGridWorldMDP):
     while renderer.running:
@@ -7,7 +8,9 @@ def show(renderer: TabularGridWorldRenderer, mdp: TabularGridWorldMDP):
         print(mdp.step())
 
 def main():
-
+    
+    rng = np.random.default_rng(21)
+    
     width, height = 5, 4
     initial_state = GridWorldState(0, 0)
     goal_state = GridWorldState(4, 3)
@@ -19,7 +22,8 @@ def main():
         height=height,
         initial_state=initial_state,
         goal_state=goal_state,
-        discount_factor=discount_factor
+        discount_factor=discount_factor,
+        rng=rng
     )
     
     state_values = mdp.solve_state_value(steps=bellman_solve_steps)
