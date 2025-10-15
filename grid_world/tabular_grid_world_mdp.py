@@ -207,7 +207,7 @@ class MCTabularGridWorldMDP(TabularGridWorldMDP):
                 for action in self.action_space.actions:
                     self.policy[(state, action)] = 1.0 if action == optimal_action else 0.0
 
-    def mc_epsilon_greedy(self, episode_count: int=20, episode_length: int=100, epsilon: float=0.1) -> None:
+    def mc_epsilon_greedy(self, episode_count: int=20, episode_length: int=100, epsilon: float=0.1, first_visit: bool=False) -> None:
         
         visit_count: Dict[Tuple[GridWorldState, GridWorldAction], int] = {
             (state, action): 0
@@ -237,6 +237,10 @@ class MCTabularGridWorldMDP(TabularGridWorldMDP):
                 (s, a, r) = episode[t]
                 G = r + self.discount_factor * G  # G_t = R_{t+1} + γ * G_{t+1}
                 
+                if first_visit:
+                    if (s, a) in [(x[0], x[1]) for x in episode[0:t]]:
+                        continue  # skip if not the first visit in this episode
+                    
                 G_sum[(s, a)] += G  # accumulate returns
                 visit_count[(s, a)] += 1
                 Q[(s, a)] = G_sum[(s, a)] / visit_count[(s, a)]  # average return

@@ -5,8 +5,7 @@ def show(renderer: TabularGridWorldRenderer, mdp: TabularGridWorldMDP):
     while renderer.running:
         renderer.handle_events()
         renderer.render(fps=30)
-        res = mdp.step()
-        # print(res)
+        mdp.step()
 
 def main():
 
