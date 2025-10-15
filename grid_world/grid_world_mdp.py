@@ -1,5 +1,6 @@
-from typing import List, Tuple, Dict, Any
+from typing import List, Tuple
 from dataclasses import dataclass
+
 from rl.mdp import MDP, Action, ActionSpace, State, StateSpace
 import random
 
@@ -30,8 +31,8 @@ class GridWorldStateSpace(StateSpace[GridWorldState]):
         x, y = state.position()
         return 0 <= x < self.width and 0 <= y < self.height
 
-    def to_list(self) -> List[List[GridWorldState]]:
-        return [[GridWorldState(x, y) for y in range(self.height)] for x in range(self.width)]
+    def to_list(self) -> List[GridWorldState]:
+        return [GridWorldState(x, y) for y in range(self.height) for x in range(self.width)]
 
 @dataclass(frozen=True, slots=True)
 class GridWorldAction(Action):
@@ -59,11 +60,6 @@ class GridWorldAction(Action):
     @classmethod
     def down(cls) -> 'GridWorldAction':
         return cls(0, 1)
-    
-    @classmethod
-    def stay(cls) -> 'GridWorldAction':
-        return cls(0, 0)
-        
 
 class GridWorldActionSpace(ActionSpace[GridWorldAction]):
     def __init__(self) -> None:
@@ -71,9 +67,8 @@ class GridWorldActionSpace(ActionSpace[GridWorldAction]):
             GridWorldAction.left(),
             GridWorldAction.right(), 
             GridWorldAction.up(),
-            GridWorldAction.down(),
-            GridWorldAction.stay()
-        ]  # left, right, up, down, stay
+            GridWorldAction.down()
+        ]
 
     def sample(self) -> GridWorldAction:
         return random.choice(self.actions)
@@ -81,88 +76,43 @@ class GridWorldActionSpace(ActionSpace[GridWorldAction]):
     def contains(self, action: GridWorldAction) -> bool:
         if not isinstance(action, GridWorldAction):
             return False
-        return (action.dx, action.dy) in self.actions
+        return GridWorldAction(action.dx, action.dy) in self.actions
     
     def to_list(self) -> List[GridWorldAction]:
-        return [GridWorldAction(dx, dy) for dx, dy in self.actions]
-      
-class GridWorldMDP(MDP[GridWorldState, GridWorldAction]):
-    def __init__(self, 
-                 state_space: GridWorldStateSpace, 
-                 action_space: GridWorldActionSpace, 
-                 start_state: GridWorldState, 
-                 goal_state: GridWorldState, 
-                 forbiddens: List[GridWorldState]) -> None:
-        self.state_space = state_space
-        self.action_space = action_space
-        
-        if not self.state_space.contains(start_state):
-            raise ValueError("Start state is out of bounds")
-        self.start_state = start_state
-        self.current_state = start_state
+        return [action for action in self.actions]
 
-        if not self.state_space.contains(goal_state):
-            raise ValueError("Goal state is out of bounds")
+class GridWorldMDP(MDP[GridWorldState, GridWorldStateSpace, GridWorldAction, GridWorldActionSpace]):
+    def __init__(self, 
+                 width: int,
+                 height: int,
+                 initial_state: GridWorldState, 
+                 goal_state: GridWorldState) -> None:
+        super().__init__(GridWorldStateSpace(width, height), GridWorldActionSpace(), initial_state)
         self.goal_state = goal_state
 
-        for forbidden in forbiddens:
-            if not self.state_space.contains(forbidden):
-                raise ValueError("Block state is out of bounds")
-        self.forbiddens = forbiddens
-
-    def reset(self) -> GridWorldState:
-        self.current_state = self.start_state
-        return self.current_state
-    
-    def step(self, action: GridWorldAction) -> Tuple[GridWorldState, float, bool, Dict[str, Any]]:
-        (x, y) = self.current_state.position()
+    def initialize(self) -> None:
+        self.current_state = self.initial_state
+        
+    def transition(self, state: GridWorldState, action: GridWorldAction) -> Tuple[GridWorldState, float]:
+        
+        def reward(next_state: GridWorldState) -> float:
+            if next_state == self.goal_state:
+                return 1.0
+            elif next_state == self.initial_state:
+                return -1.0
+            else:
+                return -0.1
+        
+        (x, y) = state.position()
         (dx, dy) = action
         new_state = GridWorldState(x + dx, y + dy)
-        
         if not self.state_space.contains(new_state):
-            return (self.current_state, -1.0, False, {})
-        
-        if new_state in self.forbiddens:
-            self.current_state = new_state
-            return (self.current_state, -1.0, False, {})
-        
-        if new_state == self.goal_state:
-            self.current_state = new_state
-            return (self.current_state, 1.0, True, {})
-        
-        self.current_state = new_state
-        return (new_state, 0.0, False, {})
+            new_state = state  # stay in the same state if out of bounds
 
-    def decide(self, state: GridWorldState) -> GridWorldAction:
-        return self.action_space.sample()
+        return (new_state, reward(new_state))
+
+    def is_terminated(self, state: GridWorldState) -> bool:
+        return False # continuing task
     
-class TabularGridWorldMDP(GridWorldMDP):
-    def __init__(self, 
-                 state_space: GridWorldStateSpace, 
-                 action_space: GridWorldActionSpace, 
-                 start_state: GridWorldState, 
-                 goal_state: GridWorldState, 
-                 forbiddens: List[GridWorldState]) -> None:
-        super().__init__(state_space, action_space, start_state, goal_state, forbiddens)
-        self.policy: Dict[Tuple[GridWorldState, GridWorldAction], float] = {}
-        self.value_function: Dict[GridWorldState, float] = {}
-        
-        for x in range(state_space.width):
-            for y in range(state_space.height):
-                state = GridWorldState(x, y)
-                for action in action_space.actions:
-                    self.policy[(state, action)] = 1.0 / len(action_space.actions)
-                    
-    def decide(self, state:GridWorldState) -> GridWorldAction:
-        actions = self.action_space.actions
-        probabilities = [self.policy[(state, action)] for action in actions]
-        
-        rng = random.uniform(0.0, 1.0)
-        cumulative_prob = 0.0
-        
-        for i, prob in enumerate(probabilities):
-            cumulative_prob += prob
-            if rng <= cumulative_prob:
-                return actions[i]
-
-        return actions[-1]
+    def is_truncated(self, state: GridWorldState) -> bool:
+        return False # continuing task
