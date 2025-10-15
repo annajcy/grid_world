@@ -4,7 +4,7 @@ def show(renderer: TabularGridWorldRenderer, mdp: TabularGridWorldMDP):
     while renderer.running:
         renderer.handle_events()
         renderer.render(fps=30)
-        mdp.step() 
+        print(mdp.step())
 
 def main():
 
@@ -23,7 +23,7 @@ def main():
     state_values = mdp.solve_state_value(steps=1000)
     renderer = TabularGridWorldRenderer(
         tabular_gw_mdp=mdp,
-        caption='Tabular Grid World - original',
+        caption='Tabular Grid World - Original',
         screen_width=800,
         screen_height=600,
         show_policy=True,
@@ -38,7 +38,7 @@ def main():
     state_values = mdp.solve_state_value(steps=1000)
     renderer = TabularGridWorldRenderer(
         tabular_gw_mdp=mdp,
-        caption='Tabular Grid World - policy iteration',
+        caption='Tabular Grid World - Policy iteration',
         screen_width=800,
         screen_height=600,
         show_policy=True,
@@ -53,7 +53,7 @@ def main():
     state_values = mdp.solve_state_value(steps=1000)
     renderer = TabularGridWorldRenderer(
         tabular_gw_mdp=mdp,
-        caption='Tabular Grid World - value iteration',
+        caption='Tabular Grid World - Value iteration',
         screen_width=800,
         screen_height=600,
         show_policy=True,
