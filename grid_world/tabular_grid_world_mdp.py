@@ -1,4 +1,3 @@
-from operator import le
 from typing import Set, Tuple, Dict, List
 import numpy as np
 

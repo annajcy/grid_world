@@ -105,3 +105,10 @@ class GridWorldRenderer(Renderer):
         for i, (text_str, color) in enumerate(legends):
             text = small_font.render(text_str, True, color)
             self.screen.blit(text, (legend_x, legend_y + i * 20))
+            
+    def render(self) -> None:
+        self.draw_goal()
+        self.draw_initial_state()
+        self.draw_grid()
+        self.draw_agent()
+        # self.draw_legend()
