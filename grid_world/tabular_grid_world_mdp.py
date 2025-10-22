@@ -299,14 +299,13 @@ class TDTabularGridWorldMDP(SampledTabularGridWorldMDP):
             state: GridWorldState = initial_state
             
             for _ in range(episode_length):
-                if state == self.goal_state:
-                    break
                 
                 action = self.decide(state)
                 next_state, reward = self.transition(state, action)
                 
                 # TD(0) update
-                V[state] = V[state] + self.learning_rate * (reward + self.discount_factor * V[next_state] - V[state])  # V(s) += α [ R(s,a) + γ * V(s') - V(s) ]
+                td_target = reward + self.discount_factor * V[next_state]
+                V[state] = V[state] + self.learning_rate * (td_target - V[state])  # V(s) += α [ R(s,a) + γ * V(s') - V(s) ]
                 
                 optimal_action = self.get_optimal_action_v(state, V)
                 
