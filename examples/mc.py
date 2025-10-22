@@ -14,8 +14,7 @@ def main():
     goal_state = GridWorldState(3, 2)
     discount_factor = 0.9
     bellman_solve_steps = 100
-    
-    # 为 basic_mdp 创建独立的随机数生成器
+
     basic_rng = np.random.default_rng(21)
     basic_mdp = MCTabularGridWorldMDP(
         width=width,
@@ -40,7 +39,6 @@ def main():
     show(basic_renderer, basic_mdp)
     basic_renderer.close()
 
-    # 为 greedy_mdp 创建独立的随机数生成器（使用相同的种子）
     greedy_rng = np.random.default_rng(21)
     greedy_mdp = MCTabularGridWorldMDP(
         width=width,
