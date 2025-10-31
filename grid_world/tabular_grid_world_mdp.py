@@ -479,10 +479,12 @@ class ValueFunctionTabularGridWorldMDP(TDTabularGridWorldMDP):
 class Q_torch(nn.Module):
     def __init__(self) -> None:
         super(Q_torch, self).__init__()
-        self.fc1 = nn.Linear(4, 8)
-        self.fc2 = nn.Linear(8, 1)
+        self.fc0 = nn.Linear(4, 32)
+        self.fc1 = nn.Linear(32, 32)
+        self.fc2 = nn.Linear(32, 1)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
+        x = torch.relu(self.fc0(x))
         x = torch.relu(self.fc1(x))
         x = self.fc2(x)
         return x
@@ -634,22 +636,20 @@ class TorchValueFunctionTabularGridWorldMDP(ValueFunctionTabularGridWorldMDP):
         loss_fn = nn.MSELoss()
 
         Q_vf_target.load_state_dict(Q_vf.state_dict())
-
+        
+        count = 0
         for sample in tqdm(sample_list, desc="DQN samples", dynamic_ncols=True):
             for epoch in trange(epochs_per_sample, desc="DQN epochs", leave=False, dynamic_ncols=True):
                 # mini-batch sampling
                 batch_indices = self.rng.choice(len(sample), size=min(batch_size, len(sample)), replace=False)
                 batch = [sample[i] for i in batch_indices]
                 
-                count = 0
+                count += 1
+                if count % update_interval == 0:
+                    Q_vf_target.load_state_dict(Q_vf.state_dict())
+                
                 for (state, action, reward, next_state) in batch:
-                    count += 1
-
-                    if count == batch_size:
-                        break
-
-                    if count % update_interval == 0:
-                        Q_vf_target.load_state_dict(Q_vf.state_dict())
+                    
                         
                     state_action_tensor = Q_vf.state_action_to_tensor(state, action)
                     

@@ -16,35 +16,57 @@ def main():
     discount_factor = 0.9
     bellman_solve_steps = 100
     
-    # vf_rng = np.random.default_rng(21)
-    # vf_mdp = TorchValueFunctionTabularGridWorldMDP(
-    #     width=width,
-    #     height=height,
-    #     initial_state=initial_state,
-    #     goal_state=goal_state,
-    #     discount_factor=discount_factor,
-    #     learning_rate=0.005,
-    #     rng=vf_rng
-    # )
+    sarsa_vf_rng = np.random.default_rng(21)
+    sarsa_vf_mdp = TorchValueFunctionTabularGridWorldMDP(
+        width=width,
+        height=height,
+        initial_state=initial_state,
+        goal_state=goal_state,
+        discount_factor=discount_factor,
+        learning_rate=0.005,
+        rng=sarsa_vf_rng
+    )
 
-    # #vf_mdp.sarsa_vf(initial_state=GridWorldState(0, 0), episode_count=2000, episode_length=50, epsilon=0.1)
-    # vf_mdp.q_learning_on_policy_vf(initial_state=GridWorldState(0, 0), episode_count=2000, episode_length=50, epsilon=0.1)
+    sarsa_vf_mdp.sarsa_vf(initial_state=GridWorldState(0, 0), episode_count=500, episode_length=50, epsilon=0.1)
     
-    # vf_renderer = TabularGridWorldRenderer(
-    #     tabular_gw_mdp=vf_mdp,
-    #     caption='Tabular Grid World - SARSA with Value Function Approximation',
-    #     screen_width=800,
-    #     screen_height=600,
-    #     show_policy=True,
-    #     show_values=True
-    # )
-    # vf_state_values = vf_mdp.solve_state_value(steps=bellman_solve_steps)
-    # vf_renderer.update_state_values(vf_state_values)
-    # show(vf_renderer, vf_mdp)
-    # vf_renderer.close()
+    sarsa_vf_renderer = TabularGridWorldRenderer(
+        tabular_gw_mdp=sarsa_vf_mdp,
+        caption='Tabular Grid World - SARSA with Value Function Approximation',
+        screen_width=800,
+        screen_height=600,
+        show_policy=True,
+        show_values=True
+    )
+    sarsa_vf_state_values = sarsa_vf_mdp.solve_state_value(steps=bellman_solve_steps)
+    sarsa_vf_renderer.update_state_values(sarsa_vf_state_values)
+    show(sarsa_vf_renderer, sarsa_vf_mdp)
+    sarsa_vf_renderer.close()
+    
+    q_learning_vf_rng = np.random.default_rng(21)
+    q_learning_vf_mdp = TorchValueFunctionTabularGridWorldMDP(
+        width=width,
+        height=height,
+        initial_state=initial_state,
+        goal_state=goal_state,
+        discount_factor=discount_factor,
+        learning_rate=0.005,
+        rng=q_learning_vf_rng
+    )
+    q_learning_vf_mdp.q_learning_on_policy_vf(initial_state=GridWorldState(0, 0), episode_count=500, episode_length=50, epsilon=0.1)
+    q_learning_vf_renderer = TabularGridWorldRenderer(
+        tabular_gw_mdp=q_learning_vf_mdp,
+        caption='Tabular Grid World - Q-Learning with Value Function Approximation',
+        screen_width=800,
+        screen_height=600,
+        show_policy=True,
+        show_values=True
+    )
+    q_learning_vf_state_values = q_learning_vf_mdp.solve_state_value(steps=bellman_solve_steps)
+    q_learning_vf_renderer.update_state_values(q_learning_vf_state_values)
+    show(q_learning_vf_renderer, q_learning_vf_mdp)
+    q_learning_vf_renderer.close()
 
     dqn_rng = np.random.default_rng(21)
-
     dqn_mdp = TorchValueFunctionTabularGridWorldMDP(
         width=width,
         height=height,
@@ -61,7 +83,7 @@ def main():
             action=dqn_mdp.decide(state=GridWorldState(0, 0)),
             episode_length=50
         ) for _ in range(100)],
-        batch_size=32,
+        batch_size=16,
         epochs_per_sample=50,
         update_interval=10
     )
