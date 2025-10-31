@@ -60,6 +60,10 @@ class GridWorldAction(Action):
     @classmethod
     def down(cls) -> 'GridWorldAction':
         return cls(0, 1)
+    
+    @classmethod
+    def action_counts(cls) -> int:
+        return 4
 
 class GridWorldActionSpace(ActionSpace[GridWorldAction]):
     def __init__(self) -> None:

@@ -1,5 +1,5 @@
 import numpy as np
-from grid_world import TabularGridWorldMDP, GridWorldState, TabularGridWorldRenderer, MCTabularGridWorldMDP, TDTabularGridWorldMDP
+from grid_world import TabularGridWorldMDP, GridWorldState, TabularGridWorldRenderer, TDTabularGridWorldMDP
 
 def show(renderer: TabularGridWorldRenderer, mdp: TabularGridWorldMDP):
     while renderer.running:
@@ -123,7 +123,7 @@ def main():
         rng=q_learning_rng_off
     )
 
-    q_learning_mdp_off.q_learning_off_policy([q_learning_mdp_off.sample_episode(
+    q_learning_mdp_off.q_learning_off_policy([q_learning_mdp_off.sample_episode_sar(
         state=GridWorldState(0, 0), 
         action=q_learning_mdp_off.decide(state=GridWorldState(0, 0)), 
         episode_length=50

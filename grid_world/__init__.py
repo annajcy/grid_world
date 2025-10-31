@@ -1,4 +1,4 @@
 from .grid_world_mdp import GridWorldMDP, GridWorldState, GridWorldAction, GridWorldStateSpace, GridWorldActionSpace
 from .grid_world_renderer import GridWorldRenderer
-from .tabular_grid_world_mdp import TabularGridWorldMDP, MCTabularGridWorldMDP, TDTabularGridWorldMDP
+from .tabular_grid_world_mdp import TabularGridWorldMDP, MCTabularGridWorldMDP, TDTabularGridWorldMDP, ValueFunctionTabularGridWorldMDP, TorchValueFunctionTabularGridWorldMDP
 from .tabular_grid_world_renderer import TabularGridWorldRenderer
