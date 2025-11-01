@@ -27,7 +27,7 @@ def main():
         rng=sarsa_vf_rng
     )
 
-    sarsa_vf_mdp.sarsa_vf(initial_state=GridWorldState(0, 0), episode_count=500, episode_length=50, epsilon=0.1)
+    sarsa_vf_mdp.sarsa_vf(initial_state=GridWorldState(0, 0), episode_count=600, episode_length=50, epsilon=0.1)
     
     sarsa_vf_renderer = TabularGridWorldRenderer(
         tabular_gw_mdp=sarsa_vf_mdp,
@@ -52,7 +52,7 @@ def main():
         learning_rate=0.005,
         rng=q_learning_vf_rng
     )
-    q_learning_vf_mdp.q_learning_on_policy_vf(initial_state=GridWorldState(0, 0), episode_count=500, episode_length=50, epsilon=0.1)
+    q_learning_vf_mdp.q_learning_on_policy_vf(initial_state=GridWorldState(0, 0), episode_count=600, episode_length=50, epsilon=0.1)
     q_learning_vf_renderer = TabularGridWorldRenderer(
         tabular_gw_mdp=q_learning_vf_mdp,
         caption='Tabular Grid World - Q-Learning with Value Function Approximation',
