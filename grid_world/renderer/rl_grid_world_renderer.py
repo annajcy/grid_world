@@ -1,20 +1,20 @@
 from typing import Dict, Optional
 import pygame
 
-from .tabular_grid_world_mdp import TabularGridWorldMDP
+from ..mdp.grid_world_mdp import GridWorldMDP
 from .grid_world_renderer import GridWorldRenderer
 
-class TabularGridWorldRenderer(GridWorldRenderer):
+class RLGridWorldRenderer(GridWorldRenderer):
     def __init__(self, 
-                 tabular_gw_mdp: TabularGridWorldMDP, 
-                 caption: str = 'Tabular Grid World Renderer',
+                 grid_world_mdp: GridWorldMDP, 
+                 caption: str = 'Grid World Renderer',
                  screen_width: int = 800, 
                  screen_height: int = 800, 
                  screen_width_margin: int = 50,
                  screen_height_margin: int = 50,
                  show_policy: bool = True,
                  show_values: bool = True) -> None:
-        super().__init__(tabular_gw_mdp, caption, screen_width, screen_height, 
+        super().__init__(grid_world_mdp, caption, screen_width, screen_height, 
                          screen_width_margin, screen_height_margin)
         self.show_policy = show_policy
         self.show_values = show_values

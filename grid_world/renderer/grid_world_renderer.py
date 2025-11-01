@@ -2,10 +2,9 @@ import pygame
 import math
 
 from rl.renderer import Renderer
-from .grid_world_mdp import GridWorldMDP
+from ..mdp.grid_world_mdp import GridWorldMDP
 
 class GridWorldRenderer(Renderer):
-
     def __init__(self, 
                  gw_mdp: GridWorldMDP, 
                  caption: str = 'Grid World Renderer',

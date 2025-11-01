@@ -1,24 +1,24 @@
-from typing import Dict, List, Tuple
+from typing import Dict, List, Optional, Tuple
 
 import numpy as np
 from tqdm.auto import trange, tqdm
 
 from .grid_world_mdp import GridWorldState, GridWorldAction
-from .tabular_grid_world_mdp import SampledTabularGridWorldMDP
+from .tab_grid_world_mdp import TabularGridWorldMDP
 
-
-class TDTabularGridWorldMDP(SampledTabularGridWorldMDP):
+class TDTabularGridWorldMDP(TabularGridWorldMDP):
     def __init__(
         self,
         width: int,
         height: int,
         initial_state: GridWorldState,
         goal_state: GridWorldState,
+        policy: Optional[Dict[Tuple[GridWorldState, GridWorldAction], float]] = None,
         discount_factor: float = 0.9,
         learning_rate: float = 0.1,
         rng: np.random.Generator = np.random.default_rng(42),
     ) -> None:
-        super().__init__(width, height, initial_state, goal_state, discount_factor, rng)
+        super().__init__(width, height, initial_state, goal_state, policy, discount_factor, rng)
         self.learning_rate = learning_rate
 
     def td0(
@@ -40,7 +40,7 @@ class TDTabularGridWorldMDP(SampledTabularGridWorldMDP):
                 td_target = reward + self.discount_factor * V[next_state]
                 V[state] = V[state] + self.learning_rate * (td_target - V[state])
 
-                optimal_action = self.get_optimal_action_v(state, V)
+                optimal_action = self.get_opt_action_from_Vs(state, V)
 
                 for action in self.action_space.actions:
                     if action == optimal_action:
@@ -74,7 +74,7 @@ class TDTabularGridWorldMDP(SampledTabularGridWorldMDP):
                 td_target = reward + self.discount_factor * Q[(next_state, next_action)]
                 Q[(state, action)] = Q[(state, action)] + self.learning_rate * (td_target - Q[(state, action)])
 
-                optimal_action = self.get_optimal_action_q(state, Q)
+                optimal_action = self.get_opt_action_from_Qsa(state, Q)
 
                 for a in self.action_space.actions:
                     if a == optimal_action:
@@ -114,7 +114,7 @@ class TDTabularGridWorldMDP(SampledTabularGridWorldMDP):
                 td_target = reward + self.discount_factor * expected_q
                 Q[(state, action)] = Q[(state, action)] + self.learning_rate * (td_target - Q[(state, action)])
 
-                optimal_action = self.get_optimal_action_q(state, Q)
+                optimal_action = self.get_opt_action_from_Qsa(state, Q)
 
                 for a in self.action_space.actions:
                     if a == optimal_action:
@@ -148,7 +148,7 @@ class TDTabularGridWorldMDP(SampledTabularGridWorldMDP):
                 td_target = reward + self.discount_factor * max_next_q
                 Q[(state, action)] = Q[(state, action)] + self.learning_rate * (td_target - Q[(state, action)])
 
-                optimal_action = self.get_optimal_action_q(state, Q)
+                optimal_action = self.get_opt_action_from_Qsa(state, Q)
 
                 for a in self.action_space.actions:
                     if a == optimal_action:
@@ -174,7 +174,7 @@ class TDTabularGridWorldMDP(SampledTabularGridWorldMDP):
                 td_target = reward + self.discount_factor * max_next_q
                 Q[(state, action)] = Q[(state, action)] + self.learning_rate * (td_target - Q[(state, action)])
 
-                optimal_action = self.get_optimal_action_q(state, Q)
+                optimal_action = self.get_opt_action_from_Qsa(state, Q)
 
                 for a in self.action_space.actions:
                     self.policy[(state, a)] = 1.0 if a == optimal_action else 0.0

@@ -1,7 +1,7 @@
-from grid_world import TabularGridWorldMDP, GridWorldState, TabularGridWorldRenderer
+from grid_world import TabularGridWorldMDP, GridWorldState, RLGridWorldRenderer
 import numpy as np
 
-def show(renderer: TabularGridWorldRenderer, mdp: TabularGridWorldMDP):
+def show(renderer: RLGridWorldRenderer, mdp: TabularGridWorldMDP):
     while renderer.running:
         renderer.handle_events()
         renderer.render(fps=30)
@@ -26,9 +26,9 @@ def main():
         rng=rng
     )
     
-    state_values = mdp.solve_state_value(steps=bellman_solve_steps)
-    renderer = TabularGridWorldRenderer(
-        tabular_gw_mdp=mdp,
+    state_values = mdp.solve_Vs(steps=bellman_solve_steps)
+    renderer = RLGridWorldRenderer(
+        grid_world_mdp=mdp,
         caption='Tabular Grid World - Original',
         screen_width=800,
         screen_height=600,
@@ -41,9 +41,9 @@ def main():
     
     mdp.initialize()
     mdp.policy_iteration(threshold=1e-4, solve_state_value_steps=bellman_solve_steps)
-    state_values = mdp.solve_state_value(steps=bellman_solve_steps)
-    renderer = TabularGridWorldRenderer(
-        tabular_gw_mdp=mdp,
+    state_values = mdp.solve_Vs(steps=bellman_solve_steps)
+    renderer = RLGridWorldRenderer(
+        grid_world_mdp=mdp,
         caption='Tabular Grid World - Policy iteration',
         screen_width=800,
         screen_height=600,
@@ -56,9 +56,9 @@ def main():
     
     mdp.initialize()
     mdp.value_iteration(threshold=1e-4)
-    state_values = mdp.solve_state_value(steps=bellman_solve_steps)
-    renderer = TabularGridWorldRenderer(
-        tabular_gw_mdp=mdp,
+    state_values = mdp.solve_Vs(steps=bellman_solve_steps)
+    renderer = RLGridWorldRenderer(
+        grid_world_mdp=mdp,
         caption='Tabular Grid World - Value iteration',
         screen_width=800,
         screen_height=600,

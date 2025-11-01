@@ -1,24 +1,24 @@
-from typing import Dict, Tuple
+from typing import Dict, Optional, Tuple
 
 import numpy as np
 
 from tqdm.auto import trange
 
 from .grid_world_mdp import GridWorldState, GridWorldAction
-from .tabular_grid_world_mdp import SampledTabularGridWorldMDP
+from .tab_grid_world_mdp import TabularGridWorldMDP
 
-
-class MCTabularGridWorldMDP(SampledTabularGridWorldMDP):
+class MCTabularGridWorldMDP(TabularGridWorldMDP):
     def __init__(
         self,
         width: int,
         height: int,
         initial_state: GridWorldState,
         goal_state: GridWorldState,
+        policy: Optional[Dict[Tuple[GridWorldState, GridWorldAction], float]] = None,
         discount_factor: float = 0.9,
         rng: np.random.Generator = np.random.default_rng(42),
     ) -> None:
-        super().__init__(width, height, initial_state, goal_state, discount_factor, rng)
+        super().__init__(width, height, initial_state, goal_state, policy, discount_factor, rng)
 
     def mc_basic(self, iterations: int = 100, episode_count: int = 10, episode_length: int = 20) -> None:
         Q: Dict[Tuple[GridWorldState, GridWorldAction], float] = {
@@ -32,8 +32,8 @@ class MCTabularGridWorldMDP(SampledTabularGridWorldMDP):
                 for action in self.action_space.actions:
                     G_total = 0.0
                     for _ in range(episode_count):
-                        episode = self.sample_episode_sar(state, action, episode_length)
-                        (s, a), G = self.get_q_with_episode(episode)
+                        episode = self.sample_sar(state, action, episode_length)
+                        (s, a), G = self.get_qsa_from_sar(episode)
                         G_total += G
                     G_avg = G_total / episode_count if episode_count > 0 else 0.0
 
@@ -76,7 +76,7 @@ class MCTabularGridWorldMDP(SampledTabularGridWorldMDP):
         }
 
         for _ in trange(episode_count, desc="MC-eps-greedy", dynamic_ncols=True):
-            episode = self.sample_episode_sar(
+            episode = self.sample_sar(
                 self.state_space.sample(self.rng),
                 self.action_space.sample(self.rng),
                 episode_length,

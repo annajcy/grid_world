@@ -1,7 +1,7 @@
 import numpy as np
-from grid_world import TabularGridWorldMDP, GridWorldState, TabularGridWorldRenderer, MCTabularGridWorldMDP
+from grid_world import TabularGridWorldMDP, GridWorldState, RLGridWorldRenderer, MCTabularGridWorldMDP
 
-def show(renderer: TabularGridWorldRenderer, mdp: TabularGridWorldMDP):
+def show(renderer: RLGridWorldRenderer, mdp: TabularGridWorldMDP):
     while renderer.running:
         renderer.handle_events()
         renderer.render(fps=30)
@@ -26,9 +26,9 @@ def main():
     )
     
     basic_mdp.mc_basic(iterations=50, episode_count=3, episode_length=8)
-    basic_state_values = basic_mdp.solve_state_value(steps=bellman_solve_steps)
-    basic_renderer = TabularGridWorldRenderer(
-        tabular_gw_mdp=basic_mdp,
+    basic_state_values = basic_mdp.solve_Vs(steps=bellman_solve_steps)
+    basic_renderer = RLGridWorldRenderer(
+        grid_world_mdp=basic_mdp,
         caption='Tabular Grid World - Monte Carlo Basic',
         screen_width=800,
         screen_height=600,
@@ -49,9 +49,9 @@ def main():
         rng=greedy_rng
     )
     greedy_mdp.mc_epsilon_greedy(episode_count=300, episode_length=50, epsilon=0.05)
-    greedy_state_values = greedy_mdp.solve_state_value(steps=bellman_solve_steps)
-    greedy_renderer = TabularGridWorldRenderer(
-        tabular_gw_mdp=greedy_mdp,
+    greedy_state_values = greedy_mdp.solve_Vs(steps=bellman_solve_steps)
+    greedy_renderer = RLGridWorldRenderer(
+        grid_world_mdp=greedy_mdp,
         caption='Tabular Grid World - Monte Carlo Epsilon Greedy',
         screen_width=800,
         screen_height=600,
