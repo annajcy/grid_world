@@ -40,23 +40,14 @@ class ValueFunctionTabularGridWorldMDP(TabularGridWorldMDP, Generic[QNetType]):
         q_net : QNetType,
         policy: Optional[Dict[Tuple[GridWorldState, GridWorldAction], float]] = None,
         discount_factor: float = 0.9,
-        learning_rate: float = 0.1,
         rng: np.random.Generator = np.random.default_rng(42),
     ) -> None:
         super().__init__(width, height, initial_state, goal_state, policy, discount_factor, rng)
-        self.learning_rate = learning_rate
-        self.model = q_net
+        self.q_net = q_net
 
     def Qsa_vf(self, state: GridWorldState, action: GridWorldAction) -> Any:
-        state_action_tensor = self.model.state_action_to_input_tensor(state, action)
-        return self.model(state_action_tensor)
-
-    def dQsa_vf(self, state: GridWorldState, action: GridWorldAction) -> Any:
-        state_action_tensor = self.model.state_action_to_input_tensor(state, action)
-        state_action_tensor.requires_grad_(True)
-        q_value = self.model(state_action_tensor)
-        q_value.backward()
-        return state_action_tensor.grad
+        state_action_tensor = self.q_net.state_action_to_input_tensor(state, action)
+        return self.q_net(state_action_tensor)
     
     def get_opt_a_from_Qsa_vf(self, state: GridWorldState) -> GridWorldAction:
         best_action = None
@@ -74,10 +65,11 @@ class ValueFunctionTabularGridWorldMDP(TabularGridWorldMDP, Generic[QNetType]):
         episode_count: int,
         episode_length: int,
         epsilon: float = 0.1,
+        learning_rate: float = 0.1,
     ) -> None:
         
-        self.model.train()
-        optimizer = torch.optim.SGD(self.model.parameters(), lr=self.learning_rate)
+        self.q_net.train()
+        optimizer = torch.optim.SGD(self.q_net.parameters(), lr=learning_rate)
         loss_fn = nn.MSELoss()
 
         for _ in trange(episode_count, desc="SARSA-VF", dynamic_ncols=True):
@@ -85,17 +77,17 @@ class ValueFunctionTabularGridWorldMDP(TabularGridWorldMDP, Generic[QNetType]):
             action: GridWorldAction = self.decide(state)
 
             for _ in range(episode_length):
-                sarsa_tensor = self.model.state_action_to_input_tensor(state, action)
+                sarsa_tensor = self.q_net.state_action_to_input_tensor(state, action)
 
                 optimizer.zero_grad()
-                q_value = self.model(sarsa_tensor)
+                q_value = self.q_net(sarsa_tensor)
 
                 next_state, reward = self.transition(state, action)
                 next_action = self.decide(next_state)
 
                 with torch.no_grad():
-                    sa_next_tensor = self.model.state_action_to_input_tensor(next_state, next_action)
-                    td_target = reward + self.discount_factor * self.model(sa_next_tensor).item()
+                    sa_next_tensor = self.q_net.state_action_to_input_tensor(next_state, next_action)
+                    td_target = reward + self.discount_factor * self.q_net(sa_next_tensor).item()
 
                 target_tensor = torch.tensor([[td_target]], dtype=q_value.dtype, device=q_value.device)
                 loss = loss_fn(q_value, target_tensor)
@@ -122,10 +114,11 @@ class ValueFunctionTabularGridWorldMDP(TabularGridWorldMDP, Generic[QNetType]):
         episode_count: int,
         episode_length: int,
         epsilon: float = 0.1,
+        learning_rate: float = 0.1,
     ) -> None:
 
-        self.model.train()
-        optimizer = torch.optim.SGD(self.model.parameters(), lr=self.learning_rate)
+        self.q_net.train()
+        optimizer = torch.optim.SGD(self.q_net.parameters(), lr=learning_rate)
         loss_fn = nn.MSELoss()
 
         for _ in trange(episode_count, desc="Q-learning VF (on)", dynamic_ncols=True):
@@ -133,18 +126,18 @@ class ValueFunctionTabularGridWorldMDP(TabularGridWorldMDP, Generic[QNetType]):
 
             for _ in range(episode_length):
                 action = self.decide(state)
-                q_learning_tensor = self.model.state_action_to_input_tensor(state, action)
+                q_learning_tensor = self.q_net.state_action_to_input_tensor(state, action)
 
                 optimizer.zero_grad()
-                q_value = self.model(q_learning_tensor)
+                q_value = self.q_net(q_learning_tensor)
 
                 next_state, reward = self.transition(state, action)
 
                 with torch.no_grad():
                     max_next_q = float("-inf")
                     for a in self.action_space.actions:
-                        sa_next_tensor = self.model.state_action_to_input_tensor(next_state, a)
-                        q_next_value = self.model(sa_next_tensor).item()
+                        sa_next_tensor = self.q_net.state_action_to_input_tensor(next_state, a)
+                        q_next_value = self.q_net(sa_next_tensor).item()
                         if q_next_value > max_next_q:
                             max_next_q = q_next_value
                     td_target = reward + self.discount_factor * max_next_q
@@ -173,14 +166,15 @@ class ValueFunctionTabularGridWorldMDP(TabularGridWorldMDP, Generic[QNetType]):
         batch_size: int = 32,
         epochs_per_sample: int = 50,
         update_interval: int = 5,
+        learning_rate: float = 0.1,
     ) -> None:
         
-        target_model: QNetType = self.model.__class__()  # Create a new instance of the same class
-        self.model.train()
-        optimizer = torch.optim.SGD(self.model.parameters(), lr=self.learning_rate)
+        target_model: QNetType = self.q_net.__class__()  # Create a new instance of the same class
+        self.q_net.train()
+        optimizer = torch.optim.SGD(self.q_net.parameters(), lr=learning_rate)
         loss_fn = nn.MSELoss()
 
-        target_model.load_state_dict(self.model.state_dict())
+        target_model.load_state_dict(self.q_net.state_dict())
 
         count = 0
         for sample in tqdm(sample_list, desc="DQN samples", dynamic_ncols=True):
@@ -190,13 +184,13 @@ class ValueFunctionTabularGridWorldMDP(TabularGridWorldMDP, Generic[QNetType]):
 
                 count += 1
                 if count % update_interval == 0:
-                    target_model.load_state_dict(self.model.state_dict())
+                    target_model.load_state_dict(self.q_net.state_dict())
 
                 for (state, action, reward, next_state) in batch:
-                    state_action_tensor = self.model.state_action_to_input_tensor(state, action)
+                    state_action_tensor = self.q_net.state_action_to_input_tensor(state, action)
 
                     optimizer.zero_grad()
-                    q_value = self.model(state_action_tensor)
+                    q_value = self.q_net(state_action_tensor)
 
                     with torch.no_grad():
                         max_next_q = float("-inf")

@@ -1,8 +1,8 @@
 import numpy as np
 
-from grid_world import TabularGridWorldMDP, GridWorldState, RLGridWorldRenderer, ValueFunctionTabularGridWorldMDP
+from grid_world import GridWorldMDP, GridWorldState, RLGridWorldRenderer
 
-def show(renderer: RLGridWorldRenderer, mdp: TabularGridWorldMDP):
+def show(renderer: RLGridWorldRenderer, mdp: GridWorldMDP):
     while renderer.running:
         renderer.handle_events()
         renderer.render(fps=30)

@@ -1,9 +1,9 @@
 import numpy as np
-from grid_world import TabularGridWorldMDP, GridWorldState, RLGridWorldRenderer, ValueFunctionTabularGridWorldMDP, QNet
+from grid_world import GridWorldMDP, GridWorldState, RLGridWorldRenderer, ValueFunctionTabularGridWorldMDP, QNet
 from torch import nn
 import torch
 
-def show(renderer: RLGridWorldRenderer, mdp: TabularGridWorldMDP):
+def show(renderer: RLGridWorldRenderer, mdp: GridWorldMDP):
     while renderer.running:
         renderer.handle_events()
         renderer.render(fps=30)
@@ -37,11 +37,16 @@ def main():
         goal_state=goal_state,
         q_net=SimpleQNet(),
         discount_factor=discount_factor,
-        learning_rate=0.005,
         rng=sarsa_vf_rng
     )
 
-    sarsa_vf_mdp.sarsa_vf(initial_state=GridWorldState(0, 0), episode_count=600, episode_length=50, epsilon=0.1)
+    sarsa_vf_mdp.sarsa_vf(
+        initial_state=GridWorldState(0, 0),
+        episode_count=600,
+        episode_length=50,
+        epsilon=0.1,
+        learning_rate=0.005,
+    )
     
     sarsa_vf_renderer = RLGridWorldRenderer(
         grid_world_mdp=sarsa_vf_mdp,
@@ -64,10 +69,15 @@ def main():
         goal_state=goal_state,
         q_net=SimpleQNet(),
         discount_factor=discount_factor,
-        learning_rate=0.005,
         rng=q_learning_vf_rng
     )
-    q_learning_vf_mdp.q_learning_on_policy_vf(initial_state=GridWorldState(0, 0), episode_count=600, episode_length=50, epsilon=0.1)
+    q_learning_vf_mdp.q_learning_on_policy_vf(
+        initial_state=GridWorldState(0, 0),
+        episode_count=600,
+        episode_length=50,
+        epsilon=0.1,
+        learning_rate=0.005,
+    )
     q_learning_vf_renderer = RLGridWorldRenderer(
         grid_world_mdp=q_learning_vf_mdp,
         caption='Tabular Grid World - Q-Learning with Value Function Approximation',
@@ -89,7 +99,6 @@ def main():
         goal_state=goal_state,
         q_net=SimpleQNet(),
         discount_factor=discount_factor,
-        learning_rate=0.005,
         rng=dqn_rng
     )
     
@@ -101,7 +110,8 @@ def main():
         ) for _ in range(100)],
         batch_size=16,
         epochs_per_sample=50,
-        update_interval=10
+        update_interval=10,
+        learning_rate=0.005,
     )
 
     dqn_state_values = dqn_mdp.solve_Vs(steps=bellman_solve_steps)

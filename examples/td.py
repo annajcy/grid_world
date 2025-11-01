@@ -1,7 +1,7 @@
 import numpy as np
-from grid_world import TabularGridWorldMDP, GridWorldState, RLGridWorldRenderer, TDTabularGridWorldMDP
+from grid_world import GridWorldMDP, GridWorldState, RLGridWorldRenderer, TDTabularGridWorldMDP
 
-def show(renderer: RLGridWorldRenderer, mdp: TabularGridWorldMDP):
+def show(renderer: RLGridWorldRenderer, mdp: GridWorldMDP):
     while renderer.running:
         renderer.handle_events()
         renderer.render(fps=30)
@@ -22,11 +22,10 @@ def main():
         initial_state=initial_state,
         goal_state=goal_state,
         discount_factor=discount_factor,
-        rng=td_rng,
-        learning_rate=0.1
+        rng=td_rng
     )
 
-    td_mdp.td0(initial_state=GridWorldState(0, 0), episode_count=1000, episode_length=100)
+    td_mdp.td0(initial_state=GridWorldState(0, 0), episode_count=1000, episode_length=100, learning_rate=0.1)
     td_state_values = td_mdp.solve_Vs(steps=bellman_solve_steps)
     td_renderer = RLGridWorldRenderer(
         grid_world_mdp=td_mdp,
@@ -50,7 +49,7 @@ def main():
         rng=sarsa_rng
     )
     
-    sarsa_mdp.sarsa(initial_state=GridWorldState(0, 0), episode_count=1000, episode_length=50)
+    sarsa_mdp.sarsa(initial_state=GridWorldState(0, 0), episode_count=1000, episode_length=50, learning_rate=0.1)
     sarsa_state_values = sarsa_mdp.solve_Vs(steps=bellman_solve_steps)
     sarsa_renderer = RLGridWorldRenderer(
         grid_world_mdp=sarsa_mdp,
@@ -74,7 +73,7 @@ def main():
         rng=ex_sarsa_rng
     )
 
-    ex_sarsa_mdp.sarsa(initial_state=GridWorldState(0, 0), episode_count=1000, episode_length=50)
+    ex_sarsa_mdp.sarsa(initial_state=GridWorldState(0, 0), episode_count=1000, episode_length=50, learning_rate=0.1)
     ex_sarsa_state_values = ex_sarsa_mdp.solve_Vs(steps=bellman_solve_steps)
     ex_sarsa_renderer = RLGridWorldRenderer(
         grid_world_mdp=ex_sarsa_mdp,
@@ -99,7 +98,7 @@ def main():
         rng=q_learning_rng
     )
 
-    q_learning_mdp.q_learning_on_policy(initial_state=GridWorldState(0, 0), episode_count=1500, episode_length=50)
+    q_learning_mdp.q_learning_on_policy(initial_state=GridWorldState(0, 0), episode_count=1500, episode_length=50, learning_rate=0.1)
     q_learning_state_values = q_learning_mdp.solve_Vs(steps=bellman_solve_steps)
     q_learning_renderer = RLGridWorldRenderer(
         grid_world_mdp=q_learning_mdp,
@@ -127,7 +126,7 @@ def main():
         state=GridWorldState(0, 0), 
         action=q_learning_mdp_off.decide(state=GridWorldState(0, 0)), 
         episode_length=50
-    ) for _ in range(1000)])
+    ) for _ in range(1000)], learning_rate=0.1)
     
     q_learning_state_values_off = q_learning_mdp_off.solve_Vs(steps=bellman_solve_steps)
     q_learning_renderer_off = RLGridWorldRenderer(
