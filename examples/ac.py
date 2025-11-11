@@ -1,4 +1,3 @@
-from email import policy
 import numpy as np
 
 from torch import nn
@@ -80,7 +79,7 @@ def main():
         value_net=value_net
     )
     
-    ac_mdp.Q_actor_critic(
+    ac_mdp.advantage_actor_critic(
         episode_count=500,
         episode_length=100,
         lr_policy=0.0001,

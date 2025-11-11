@@ -55,7 +55,7 @@ class ActorCriticGridWorldMDP(
         super().initialize()
         self.value_net.load_state_dict(self.initial_value_weights)
     
-    def Q_actor_critic(self, 
+    def advantage_actor_critic(self, 
                        episode_count: int, 
                        episode_length: int, 
                        lr_policy: float = 0.01, 
