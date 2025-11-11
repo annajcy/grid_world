@@ -22,6 +22,12 @@ class SimplePolicyNet(PolicyNet):
         x = torch.relu(self.fc1(x))
         x = self.fc2(x) 
         return x
+    
+    def init(self, rng=torch.Generator().manual_seed(42)) -> None:
+        for m in self.modules():
+            if isinstance(m, nn.Linear):
+                nn.init.normal_(m.weight, mean=0.0, std=0.1, generator=rng)
+                nn.init.zeros_(m.bias)
 
 def main():
 
@@ -30,6 +36,10 @@ def main():
     goal_state = GridWorldState(3, 2)
     discount_factor = 0.9
     bellman_solve_steps = 100
+    
+    policy_net = SimplePolicyNet()
+    p_net_seed = torch.Generator().manual_seed(42)
+    policy_net.init(rng=p_net_seed)
     
     reinforce_rng = np.random.default_rng(21)
     reinforce_mdp = PolicyGradientGridWorldMDP[SimplePolicyNet](

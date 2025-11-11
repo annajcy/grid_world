@@ -21,6 +21,12 @@ class SimpleQNet(QNet):
         x = torch.relu(self.fc1(x))
         x = self.fc2(x)
         return x
+    
+    def init(self, rng=torch.Generator().manual_seed(42)) -> None:
+        for m in self.modules():
+            if isinstance(m, nn.Linear):
+                nn.init.normal_(m.weight, mean=0.0, std=0.1, generator=rng)
+                nn.init.zeros_(m.bias)
 
 def main():
     width, height = 5, 4
@@ -28,6 +34,10 @@ def main():
     goal_state = GridWorldState(3, 2)
     discount_factor = 0.9
     bellman_solve_steps = 100
+    
+    q_net = SimpleQNet()
+    q_net_seed = torch.Generator().manual_seed(42)
+    q_net.init(rng=q_net_seed)
     
     sarsa_vf_rng = np.random.default_rng(21)
     sarsa_vf_mdp = ValueFunctionTabularGridWorldMDP[SimpleQNet](
